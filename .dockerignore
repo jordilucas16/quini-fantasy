@@ -37,9 +37,11 @@ Thumbs.db
 .gitignore
 .gitattributes
 
-# Documentation
-*.md
-!README.md
+# Documentation (keep README.md - needed by hatchling)
+AGENTS.md
+DATABASE.md
+DEPLOYMENT.md
+COMANDOS.md
 
 # Tests
 tests/

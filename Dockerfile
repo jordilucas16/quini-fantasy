@@ -29,8 +29,8 @@ RUN apt-get update && apt-get install -y \
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Copy Python dependencies files
-COPY pyproject.toml uv.lock ./
+# Copy Python dependencies files and README (needed by hatchling)
+COPY pyproject.toml uv.lock README.md ./
 
 # Install Python dependencies
 RUN uv sync --frozen --no-dev
