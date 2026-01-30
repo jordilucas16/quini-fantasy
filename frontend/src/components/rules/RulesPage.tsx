@@ -23,10 +23,11 @@ interface RulesPageProps {
   onBack: () => void;
   onNavigateToRules?: () => void;
   onNavigateToScoring?: () => void;
-  currentPage?: 'play' | 'history' | 'rules' | 'scoring';
+  onNavigateToRanking?: () => void;
+  currentPage?: 'play' | 'history' | 'rules' | 'scoring' | 'ranking';
 }
 
-export function RulesPage({ onBack, onNavigateToRules, onNavigateToScoring, currentPage = 'rules' }: RulesPageProps) {
+export function RulesPage({ onBack, onNavigateToRules, onNavigateToScoring, onNavigateToRanking, currentPage = 'rules' }: RulesPageProps) {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const openSignup = () => {
@@ -35,7 +36,7 @@ export function RulesPage({ onBack, onNavigateToRules, onNavigateToScoring, curr
   return (
     <div className="min-h-screen flex flex-col">
       <AnimatedBackground />
-      <Header currentPage={currentPage} onNavigateToRules={onNavigateToRules} onNavigateToScoring={onNavigateToScoring} />
+      <Header currentPage={currentPage} onNavigateToRules={onNavigateToRules} onNavigateToScoring={onNavigateToScoring} onNavigateToRanking={onNavigateToRanking} />
 
       <main className="flex-1 py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">

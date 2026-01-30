@@ -16,6 +16,9 @@ build/
 # OS
 .DS_Store
 
+# Claude Code
+.claude/
+
 # Database
 data/
 

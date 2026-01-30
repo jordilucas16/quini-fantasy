@@ -22,11 +22,14 @@ import { Header, Footer, AnimatedBackground } from '../layout';
 
 interface HistoryPageProps {
   onBack: () => void;
+  onNavigateToHistory?: () => void;
+  onNavigateToRules?: () => void;
   onNavigateToScoring?: () => void;
-  currentPage?: 'play' | 'history' | 'rules' | 'scoring';
+  onNavigateToRanking?: () => void;
+  currentPage?: 'play' | 'history' | 'rules' | 'scoring' | 'ranking';
 }
 
-export function HistoryPage({ onBack, onNavigateToScoring, currentPage = 'history' }: HistoryPageProps) {
+export function HistoryPage({ onBack, onNavigateToHistory, onNavigateToRules, onNavigateToScoring, onNavigateToRanking, currentPage = 'history' }: HistoryPageProps) {
   const { isAuthenticated } = useAuth();
   const [predictions, setPredictions] = useState<PredictionHistory[]>([]);
   const [selectedPrediction, setSelectedPrediction] = useState<PredictionDetail | null>(null);
@@ -68,7 +71,13 @@ export function HistoryPage({ onBack, onNavigateToScoring, currentPage = 'histor
     return (
       <div className="min-h-screen flex flex-col">
         <AnimatedBackground />
-        <Header currentPage={currentPage} onNavigateToScoring={onNavigateToScoring} />
+        <Header
+          currentPage={currentPage}
+          onNavigateToHistory={onNavigateToHistory}
+          onNavigateToRules={onNavigateToRules}
+          onNavigateToScoring={onNavigateToScoring}
+          onNavigateToRanking={onNavigateToRanking}
+        />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center p-8">
             <History className="w-16 h-16 text-white/30 mx-auto mb-4" />
@@ -84,7 +93,13 @@ export function HistoryPage({ onBack, onNavigateToScoring, currentPage = 'histor
   return (
     <div className="min-h-screen flex flex-col">
       <AnimatedBackground />
-      <Header currentPage={currentPage} onNavigateToScoring={onNavigateToScoring} />
+      <Header
+        currentPage={currentPage}
+        onNavigateToHistory={onNavigateToHistory}
+        onNavigateToRules={onNavigateToRules}
+        onNavigateToScoring={onNavigateToScoring}
+        onNavigateToRanking={onNavigateToRanking}
+      />
 
       <main className="flex-1 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">

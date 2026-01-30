@@ -138,6 +138,11 @@ class ApiService {
   async getPredictionDetail(predictionId: number) {
     return this.request<PredictionDetail>(`/predictions/${predictionId}/detail`);
   }
+
+  // Ranking endpoints
+  async getRankings() {
+    return this.request<RankingEntry[]>('/rankings');
+  }
 }
 
 // Round/Matchup types
@@ -210,6 +215,14 @@ export interface PredictionDetail {
   correct_count: number;
   total_count: number;
   matchups: MatchupDetail[];
+}
+
+export interface RankingEntry {
+  rank: number;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  total_score: number;
 }
 
 // Singleton instance

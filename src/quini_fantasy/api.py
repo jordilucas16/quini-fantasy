@@ -21,6 +21,7 @@ from quini_fantasy.schemas import (
     PredictionDetailResponse,
     PredictionHistoryResponse,
     PredictionResponse,
+    RankingEntryResponse,
     RoundResponse,
     TokenResponse,
     UserCreate,
@@ -344,3 +345,42 @@ def get_prediction_detail(
         total_count=len(matchups),
         matchups=matchup_details,
     )
+
+
+# Ranking endpoints
+@router.get("/rankings", response_model=list[RankingEntryResponse])
+def get_rankings(db: Session = Depends(get_db)) -> list[RankingEntryResponse]:
+    """Get user rankings sorted by total score."""
+    # Get all users with their total scores
+    users = db.query(User).all()
+
+    user_scores = []
+    for user in users:
+        # Sum all scores from predictions
+        total_score = (
+            db.query(Prediction)
+            .filter(
+                Prediction.user_id == user.id,
+                Prediction.score.isnot(None),
+            )
+            .with_entities(Prediction.score)
+            .all()
+        )
+
+        total = sum(score[0] for score in total_score if score[0] is not None)
+        user_scores.append({"username": user.username, "total_score": total})
+
+    # Sort by total_score descending
+    user_scores.sort(key=lambda x: x["total_score"], reverse=True)
+
+    # Add rank
+    rankings = [
+        RankingEntryResponse(
+            rank=idx + 1,
+            username=entry["username"],
+            total_score=entry["total_score"],
+        )
+        for idx, entry in enumerate(user_scores)
+    ]
+
+    return rankings

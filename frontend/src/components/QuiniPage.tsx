@@ -12,14 +12,15 @@ interface QuiniPageProps {
   onNavigateToHistory?: () => void;
   onNavigateToRules?: () => void;
   onNavigateToScoring?: () => void;
-  currentPage?: 'play' | 'history' | 'rules' | 'scoring';
+  onNavigateToRanking?: () => void;
+  currentPage?: 'play' | 'history' | 'rules' | 'scoring' | 'ranking';
 }
 
 /**
  * Main quiniela page - the core of the application
  * Users select which player they think will score more points in each matchup
  */
-export function QuiniPage({ onNavigateToHistory, onNavigateToRules, onNavigateToScoring, currentPage = 'play' }: QuiniPageProps) {
+export function QuiniPage({ onNavigateToHistory, onNavigateToRules, onNavigateToScoring, onNavigateToRanking, currentPage = 'play' }: QuiniPageProps) {
   const {
     matchups,
     selectedCount,
@@ -34,6 +35,7 @@ export function QuiniPage({ onNavigateToHistory, onNavigateToRules, onNavigateTo
     closeConfirmation,
     deadline,
     roundName,
+    error,
   } = useMatchups();
 
   const { isAuthenticated } = useAuth();
@@ -50,7 +52,7 @@ export function QuiniPage({ onNavigateToHistory, onNavigateToRules, onNavigateTo
   return (
     <div className="min-h-screen flex flex-col">
       <AnimatedBackground />
-      <Header onNavigateToHistory={onNavigateToHistory} onNavigateToRules={onNavigateToRules} onNavigateToScoring={onNavigateToScoring} currentPage={currentPage} />
+      <Header onNavigateToHistory={onNavigateToHistory} onNavigateToRules={onNavigateToRules} onNavigateToScoring={onNavigateToScoring} onNavigateToRanking={onNavigateToRanking} currentPage={currentPage} />
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -157,6 +159,7 @@ export function QuiniPage({ onNavigateToHistory, onNavigateToRules, onNavigateTo
         matchups={matchups}
         roundName={roundName}
         isSubmitting={isSubmitting}
+        error={error}
       />
 
       {/* Auth Modal for unauthenticated users */}

@@ -1,5 +1,5 @@
-import { Trophy, Menu, X, LogIn, LogOut, User, History } from 'lucide-react';
-import { useState } from 'react';
+import { Trophy, Menu, X, LogIn, LogOut, User, History, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { useAuth } from '../../contexts/AuthContext';
 import { AuthModal } from '../auth';
@@ -8,18 +8,36 @@ interface HeaderProps {
   onNavigateToHistory?: () => void;
   onNavigateToRules?: () => void;
   onNavigateToScoring?: () => void;
-  currentPage?: 'play' | 'history' | 'rules' | 'scoring';
+  onNavigateToRanking?: () => void;
+  currentPage?: 'play' | 'history' | 'rules' | 'scoring' | 'ranking';
 }
 
 /**
  * Application header with logo and navigation
  */
-export function Header({ onNavigateToHistory, onNavigateToRules, onNavigateToScoring, currentPage = 'play' }: HeaderProps) {
+export function Header({ onNavigateToHistory, onNavigateToRules, onNavigateToScoring, onNavigateToRanking, currentPage = 'play' }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileUserMenuOpen, setMobileUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const { user, isAuthenticated, logout } = useAuth();
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [userMenuOpen]);
 
   const openLogin = () => {
     setAuthMode('login');
@@ -61,7 +79,20 @@ export function Header({ onNavigateToHistory, onNavigateToRules, onNavigateToSco
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1" aria-label="Navegacion principal">
               <NavLink href="/" active={currentPage === 'play'}>Jugar</NavLink>
-              <NavLink href="/resultados">Ranking</NavLink>
+              {onNavigateToRanking && (
+                <button
+                  onClick={onNavigateToRanking}
+                  className={clsx(
+                    'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                    currentPage === 'ranking'
+                      ? 'text-white bg-white/10'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  )}
+                  aria-current={currentPage === 'ranking' ? 'page' : undefined}
+                >
+                  Ranking
+                </button>
+              )}
               {onNavigateToScoring && (
                 <button
                   onClick={onNavigateToScoring}
@@ -95,27 +126,48 @@ export function Header({ onNavigateToHistory, onNavigateToRules, onNavigateToSco
             {/* Auth buttons - Desktop */}
             <div className="hidden md:flex items-center gap-2">
               {isAuthenticated ? (
-                <div className="flex items-center gap-3">
-                  {onNavigateToHistory && (
-                    <button
-                      onClick={onNavigateToHistory}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      <History className="w-4 h-4" />
-                      <span className="text-sm">Historial</span>
-                    </button>
-                  )}
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5">
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                    aria-expanded={userMenuOpen}
+                    aria-haspopup="true"
+                  >
                     <User className="w-4 h-4 text-primary-400" />
                     <span className="text-sm font-medium text-white">{user?.username}</span>
-                  </div>
-                  <button
-                    onClick={logout}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span className="text-sm">Salir</span>
+                    <ChevronDown className={clsx(
+                      "w-4 h-4 text-white/40 transition-transform",
+                      userMenuOpen && "rotate-180"
+                    )} />
                   </button>
+
+                  {/* Dropdown menu */}
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-56 rounded-xl bg-dark-900/95 backdrop-blur-xl border border-white/10 shadow-xl overflow-hidden">
+                      {onNavigateToHistory && (
+                        <button
+                          onClick={() => {
+                            onNavigateToHistory();
+                            setUserMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/5 transition-colors border-b border-white/5"
+                        >
+                          <History className="w-4 h-4 text-blue-400" />
+                          <span className="text-sm text-white">Mi historial</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          logout();
+                          setUserMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/5 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 text-red-400" />
+                        <span className="text-sm text-white">Cerrar sesion</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
@@ -158,7 +210,7 @@ export function Header({ onNavigateToHistory, onNavigateToRules, onNavigateToSco
             id="mobile-menu"
             className={clsx(
               'md:hidden overflow-hidden transition-all duration-300',
-              mobileMenuOpen ? 'max-h-96 pb-4' : 'max-h-0'
+              mobileMenuOpen ? 'max-h-[32rem] pb-4' : 'max-h-0'
             )}
             aria-label="Navegacion movil"
           >
@@ -166,9 +218,23 @@ export function Header({ onNavigateToHistory, onNavigateToRules, onNavigateToSco
               <MobileNavLink href="/" active={currentPage === 'play'} onClick={() => setMobileMenuOpen(false)}>
                 Jugar
               </MobileNavLink>
-              <MobileNavLink href="/resultados" onClick={() => setMobileMenuOpen(false)}>
-                Ranking
-              </MobileNavLink>
+              {onNavigateToRanking && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onNavigateToRanking();
+                  }}
+                  className={clsx(
+                    'px-4 py-3 rounded-lg text-base font-medium transition-all text-left',
+                    currentPage === 'ranking'
+                      ? 'text-white bg-white/10'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  )}
+                  aria-current={currentPage === 'ranking' ? 'page' : undefined}
+                >
+                  Ranking
+                </button>
+              )}
               {onNavigateToScoring && (
                 <button
                   onClick={() => {
@@ -208,32 +274,49 @@ export function Header({ onNavigateToHistory, onNavigateToRules, onNavigateToSco
               <div className="border-t border-white/10 mt-2 pt-3">
                 {isAuthenticated ? (
                   <>
-                    <div className="flex items-center gap-2 px-4 py-2 text-white/70">
-                      <User className="w-4 h-4 text-primary-400" />
-                      <span className="text-sm">{user?.username}</span>
-                    </div>
-                    {onNavigateToHistory && (
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          onNavigateToHistory();
-                        }}
-                        className="flex items-center gap-2 w-full px-4 py-3 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
-                      >
-                        <History className="w-4 h-4" />
-                        <span className="text-base font-medium">Mi historial</span>
-                      </button>
-                    )}
                     <button
-                      onClick={() => {
-                        logout();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex items-center gap-2 w-full px-4 py-3 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                      onClick={() => setMobileUserMenuOpen(!mobileUserMenuOpen)}
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                     >
-                      <LogOut className="w-4 h-4" />
-                      <span className="text-base font-medium">Cerrar sesion</span>
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-primary-400" />
+                        <span className="text-sm font-medium text-white">{user?.username}</span>
+                      </div>
+                      <ChevronDown className={clsx(
+                        "w-4 h-4 text-white/40 transition-transform",
+                        mobileUserMenuOpen && "rotate-180"
+                      )} />
                     </button>
+
+                    {/* Mobile user submenu */}
+                    {mobileUserMenuOpen && (
+                      <div className="mt-1 ml-4 space-y-1">
+                        {onNavigateToHistory && (
+                          <button
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              setMobileUserMenuOpen(false);
+                              onNavigateToHistory();
+                            }}
+                            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg hover:bg-white/5 transition-colors"
+                          >
+                            <History className="w-4 h-4 text-blue-400" />
+                            <span className="text-sm text-white">Mi historial</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            logout();
+                            setMobileMenuOpen(false);
+                            setMobileUserMenuOpen(false);
+                          }}
+                          className="flex items-center gap-3 w-full px-4 py-3 rounded-lg hover:bg-white/5 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4 text-red-400" />
+                          <span className="text-sm text-white">Cerrar sesion</span>
+                        </button>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>

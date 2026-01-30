@@ -9,13 +9,9 @@ import {
   Trophy,
   Target,
   ShieldAlert,
-  AlertCircle,
-  Check,
-  X,
-  Star,
-  TrendingUp,
   ChevronDown,
   Calculator,
+  Info,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Header, Footer, AnimatedBackground } from '../layout';
@@ -24,15 +20,39 @@ interface ScoringPageProps {
   onBack: () => void;
   onNavigateToRules?: () => void;
   onNavigateToScoring?: () => void;
-  currentPage?: 'play' | 'history' | 'rules' | 'scoring';
+  onNavigateToRanking?: () => void;
+  currentPage?: 'play' | 'history' | 'rules' | 'scoring' | 'ranking';
+}
+
+/** A single row entry for the scoring table */
+interface ScoringRow {
+  stat: string;
+  points: string;
+  type: 'positive' | 'negative' | 'neutral';
 }
 
 export function ScoringPage({
   onBack,
   onNavigateToRules,
   onNavigateToScoring,
+  onNavigateToRanking,
   currentPage = 'scoring',
 }: ScoringPageProps) {
+  const generalStats: ScoringRow[] = [
+    { stat: 'Goles', points: '+3', type: 'positive' },
+    { stat: 'Asistencias', points: '+1.5', type: 'positive' },
+    { stat: 'Partidos jugados', points: '+0.2', type: 'positive' },
+    { stat: 'Tarjeta amarilla', points: '-0.5', type: 'negative' },
+    { stat: 'Tarjeta roja', points: '-2', type: 'negative' },
+  ];
+
+  const goalkeeperStats: ScoringRow[] = [
+    { stat: 'Porteria a cero', points: '+3', type: 'positive' },
+    { stat: 'Penalti parado', points: '+2.5', type: 'positive' },
+    { stat: 'Parada', points: '+1', type: 'positive' },
+    { stat: 'Gol en contra', points: '-1', type: 'negative' },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <AnimatedBackground />
@@ -40,6 +60,7 @@ export function ScoringPage({
         currentPage={currentPage}
         onNavigateToRules={onNavigateToRules}
         onNavigateToScoring={onNavigateToScoring}
+        onNavigateToRanking={onNavigateToRanking}
       />
 
       <main className="flex-1 py-8">
@@ -71,74 +92,31 @@ export function ScoringPage({
             {/* General Stats */}
             <ScoringCard
               icon={<Target className="w-6 h-6" />}
-              title="Estadisticas Generales (Todos los jugadores)"
+              title="Estadisticas Generales"
+              subtitle="Aplicable a todos los jugadores"
               defaultOpen
             >
-              <div className="grid sm:grid-cols-2 gap-4">
-                <StatItem
-                  icon={<Target className="w-5 h-5" />}
-                  label="Goles"
-                  value="+3 puntos"
-                  color="emerald"
-                />
-                <StatItem
-                  icon={<TrendingUp className="w-5 h-5" />}
-                  label="Asistencias"
-                  value="+1.5 puntos"
-                  color="blue"
-                />
-                <StatItem
-                  icon={<AlertCircle className="w-5 h-5" />}
-                  label="Tarjeta Amarilla"
-                  value="-0.5 puntos"
-                  color="yellow"
-                />
-                <StatItem
-                  icon={<X className="w-5 h-5" />}
-                  label="Tarjeta Roja"
-                  value="-2 puntos"
-                  color="red"
-                />
-                <StatItem
-                  icon={<Star className="w-5 h-5" />}
-                  label="Partidos Jugados"
-                  value="+0.2 por partido"
-                  color="purple"
-                  className="sm:col-span-2"
-                />
+              <ScoringTable rows={generalStats} />
+              <div className="flex items-start gap-3 mt-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <Info className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-white/40 leading-relaxed">
+                  Los puntos por partidos jugados se acumulan automaticamente por cada jornada en la que el jugador participa.
+                </p>
               </div>
             </ScoringCard>
 
             {/* Goalkeeper Stats */}
             <ScoringCard
               icon={<ShieldAlert className="w-6 h-6" />}
-              title="Estadisticas de Portero (Solo GK)"
+              title="Estadisticas de Portero"
+              subtitle="Exclusivo para porteros (GK)"
             >
-              <div className="grid sm:grid-cols-2 gap-4">
-                <StatItem
-                  icon={<X className="w-5 h-5" />}
-                  label="Gol en Contra"
-                  value="-1 punto"
-                  color="red"
-                />
-                <StatItem
-                  icon={<Check className="w-5 h-5" />}
-                  label="Parada"
-                  value="+1 punto"
-                  color="blue"
-                />
-                <StatItem
-                  icon={<Trophy className="w-5 h-5" />}
-                  label="Porteria a Cero"
-                  value="+3 puntos"
-                  color="emerald"
-                />
-                <StatItem
-                  icon={<Star className="w-5 h-5" />}
-                  label="Penalti Parado"
-                  value="+2.5 puntos"
-                  color="purple"
-                />
+              <ScoringTable rows={goalkeeperStats} />
+              <div className="flex items-start gap-3 mt-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <Info className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-white/40 leading-relaxed">
+                  Estos puntos se suman a las estadisticas generales. Un portero tambien recibe puntos por goles, asistencias y tarjetas.
+                </p>
               </div>
             </ScoringCard>
 
@@ -146,77 +124,64 @@ export function ScoringPage({
             <ScoringCard
               icon={<Calculator className="w-6 h-6" />}
               title="Como se calcula la Media"
+              subtitle="Formula y ejemplo practico"
             >
-              <div className="space-y-4">
-                <p className="text-white/70">
+              <div className="space-y-5">
+                <p className="text-white/70 leading-relaxed">
                   El campo <strong className="text-white">Media</strong> que ves en cada
-                  jugador representa sus puntos promedio por jornada.
+                  jugador representa sus puntos promedio por jornada. Es el indicador
+                  principal para comparar rendimiento entre jugadores.
                 </p>
 
-                <div className="p-4 rounded-xl bg-primary-500/10 border border-primary-500/20">
-                  <p className="text-sm font-mono text-white">
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <p className="text-xs uppercase tracking-wider text-white/40 mb-2">Formula</p>
+                  <p className="font-mono text-white text-sm">
                     Media = Suma Total de Puntos / 21 jornadas
                   </p>
                 </div>
 
-                <p className="text-sm text-white/60">
-                  Este valor te ayuda a comparar jugadores y tomar mejores decisiones
-                  en tus predicciones.
-                </p>
-
                 {/* Example */}
-                <div className="mt-6 p-6 rounded-xl bg-gradient-to-br from-accent-500/10 to-primary-500/10 border border-accent-500/20">
-                  <h4 className="text-lg font-bold text-white mb-4">Ejemplo de Calculo</h4>
-
-                  <div className="space-y-4 text-white/70">
-                    <p className="text-sm">
-                      Imaginemos un delantero con estas estadisticas:
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-white/40 mb-3">Ejemplo practico</p>
+                  <div className="p-5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                    <p className="text-sm text-white/60 mb-4">
+                      Delantero con las siguientes estadisticas acumuladas en la temporada:
                     </p>
 
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div>
-                        <span className="text-white/50">Goles:</span>{' '}
-                        <span className="text-white font-semibold">8</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50">Asistencias:</span>{' '}
-                        <span className="text-white font-semibold">3</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50">Tarjetas amarillas:</span>{' '}
-                        <span className="text-white font-semibold">2</span>
-                      </div>
-                      <div>
-                        <span className="text-white/50">Partidos jugados:</span>{' '}
-                        <span className="text-white font-semibold">15</span>
-                      </div>
+                    {/* Stats summary in a compact grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                      <ExampleStat label="Goles" value="8" />
+                      <ExampleStat label="Asistencias" value="3" />
+                      <ExampleStat label="Amarillas" value="2" />
+                      <ExampleStat label="Partidos" value="15" />
                     </div>
 
-                    <div className="p-4 rounded-xl bg-white/5 space-y-2 font-mono text-sm">
-                      <div className="flex justify-between">
-                        <span>Goles (8 × 3):</span>
-                        <span className="text-emerald-400">+24 pts</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Asistencias (3 × 1.5):</span>
-                        <span className="text-blue-400">+4.5 pts</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Amarillas (2 × -0.5):</span>
-                        <span className="text-yellow-400">-1 pt</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Partidos (15 × 0.2):</span>
-                        <span className="text-purple-400">+3 pts</span>
-                      </div>
-                      <div className="border-t border-white/10 pt-2 flex justify-between font-bold">
-                        <span className="text-white">Total:</span>
-                        <span className="text-accent-400">30.5 pts</span>
-                      </div>
-                      <div className="flex justify-between font-bold">
-                        <span className="text-white">Media (30.5 / 21):</span>
-                        <span className="gradient-text text-lg">1.45 pts/jornada</span>
-                      </div>
+                    {/* Calculation breakdown */}
+                    <div className="border-t border-white/[0.06] pt-4">
+                      <table className="w-full text-sm" role="table" aria-label="Desglose del calculo">
+                        <thead className="sr-only">
+                          <tr>
+                            <th>Concepto</th>
+                            <th>Puntos</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <CalculationRow label="Goles" formula="8 x 3" value="+24" />
+                          <CalculationRow label="Asistencias" formula="3 x 1.5" value="+4.5" />
+                          <CalculationRow label="Amarillas" formula="2 x -0.5" value="-1" isNegative />
+                          <CalculationRow label="Partidos" formula="15 x 0.2" value="+3" />
+                        </tbody>
+                        <tfoot>
+                          <tr className="border-t border-white/10">
+                            <td className="pt-3 text-white font-semibold">Total</td>
+                            <td className="pt-3 text-right text-white font-semibold">30.5 pts</td>
+                          </tr>
+                          <tr>
+                            <td className="pt-1 text-white font-semibold">Media (30.5 / 21)</td>
+                            <td className="pt-1 text-right font-bold gradient-text">1.45 pts/jornada</td>
+                          </tr>
+                        </tfoot>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -231,14 +196,17 @@ export function ScoringPage({
   );
 }
 
+/* ─── Expandable Card Shell ───────────────────────────────────────────── */
+
 interface ScoringCardProps {
   icon: React.ReactNode;
   title: string;
+  subtitle?: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }
 
-function ScoringCard({ icon, title, children, defaultOpen = false }: ScoringCardProps) {
+function ScoringCard({ icon, title, subtitle, children, defaultOpen = false }: ScoringCardProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
@@ -255,6 +223,7 @@ function ScoringCard({ icon, title, children, defaultOpen = false }: ScoringCard
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center gap-4 p-5 text-left"
+        aria-expanded={isOpen}
       >
         <div
           className={clsx(
@@ -266,12 +235,17 @@ function ScoringCard({ icon, title, children, defaultOpen = false }: ScoringCard
         >
           {icon}
         </div>
-        <span className="flex-1 text-lg font-semibold text-white">{title}</span>
+        <div className="flex-1 min-w-0">
+          <span className="block text-lg font-semibold text-white">{title}</span>
+          {subtitle && (
+            <span className="block text-sm text-white/40 mt-0.5">{subtitle}</span>
+          )}
+        </div>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
           className={clsx(
-            'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+            'w-8 h-8 rounded-lg flex items-center justify-center transition-colors flex-shrink-0',
             isOpen ? 'bg-primary-500/20 text-primary-400' : 'bg-white/5 text-white/40'
           )}
         >
@@ -297,34 +271,94 @@ function ScoringCard({ icon, title, children, defaultOpen = false }: ScoringCard
   );
 }
 
-interface StatItemProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  color: 'emerald' | 'blue' | 'yellow' | 'red' | 'purple';
-  className?: string;
+/* ─── Scoring Table ───────────────────────────────────────────────────── */
+
+interface ScoringTableProps {
+  rows: ScoringRow[];
 }
 
-function StatItem({ icon, label, value, color, className }: StatItemProps) {
-  const colorClasses = {
-    emerald: 'from-emerald-500/20 to-emerald-600/20 border-emerald-500/30 text-emerald-400',
-    blue: 'from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-400',
-    yellow: 'from-yellow-500/20 to-yellow-600/20 border-yellow-500/30 text-yellow-400',
-    red: 'from-red-500/20 to-red-600/20 border-red-500/30 text-red-400',
-    purple: 'from-purple-500/20 to-purple-600/20 border-purple-500/30 text-purple-400',
-  };
-
+function ScoringTable({ rows }: ScoringTableProps) {
   return (
-    <div
-      className={`p-4 rounded-xl bg-gradient-to-br border ${colorClasses[color]} ${className || ''}`}
-    >
-      <div className="flex items-center gap-3">
-        <div className="flex-shrink-0">{icon}</div>
-        <div className="flex-1">
-          <div className="text-white/60 text-sm">{label}</div>
-          <div className="text-white font-bold text-lg">{value}</div>
-        </div>
-      </div>
+    <div className="rounded-xl overflow-hidden border border-white/[0.06]">
+      <table className="w-full text-sm" role="table" aria-label="Tabla de puntuacion">
+        <thead>
+          <tr className="bg-white/[0.04]">
+            <th className="text-left py-2.5 px-4 text-xs uppercase tracking-wider text-white/40 font-medium">
+              Estadistica
+            </th>
+            <th className="text-right py-2.5 px-4 text-xs uppercase tracking-wider text-white/40 font-medium">
+              Puntos
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, index) => (
+            <tr
+              key={row.stat}
+              className={clsx(
+                'transition-colors hover:bg-white/[0.02]',
+                index < rows.length - 1 && 'border-b border-white/[0.04]'
+              )}
+            >
+              <td className="py-3 px-4 text-white/70">{row.stat}</td>
+              <td className="py-3 px-4 text-right">
+                <span
+                  className={clsx(
+                    'inline-flex items-center justify-center min-w-[4rem] px-2.5 py-1 rounded-md text-xs font-semibold',
+                    row.type === 'positive' && 'bg-emerald-500/10 text-emerald-400',
+                    row.type === 'negative' && 'bg-red-500/10 text-red-400',
+                    row.type === 'neutral' && 'bg-white/5 text-white/60'
+                  )}
+                >
+                  {row.points}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
+  );
+}
+
+/* ─── Example Calculation Helpers ─────────────────────────────────────── */
+
+interface ExampleStatProps {
+  label: string;
+  value: string;
+}
+
+function ExampleStat({ label, value }: ExampleStatProps) {
+  return (
+    <div className="text-center p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.04]">
+      <p className="text-xs text-white/40 mb-1">{label}</p>
+      <p className="text-lg font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
+interface CalculationRowProps {
+  label: string;
+  formula: string;
+  value: string;
+  isNegative?: boolean;
+}
+
+function CalculationRow({ label, formula, value, isNegative = false }: CalculationRowProps) {
+  return (
+    <tr>
+      <td className="py-1.5 text-white/50">
+        {label}{' '}
+        <span className="text-white/30">({formula})</span>
+      </td>
+      <td
+        className={clsx(
+          'py-1.5 text-right font-mono',
+          isNegative ? 'text-red-400/70' : 'text-emerald-400/70'
+        )}
+      >
+        {value}
+      </td>
+    </tr>
   );
 }

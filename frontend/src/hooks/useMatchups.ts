@@ -125,6 +125,7 @@ export function useMatchups(): UseMatchupsReturn {
 
   const closeConfirmation = useCallback(() => {
     setShowConfirmation(false);
+    setError(null); // Clear error when closing modal
   }, []);
 
   const confirmSubmit = useCallback(async () => {
@@ -157,7 +158,7 @@ export function useMatchups(): UseMatchupsReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al enviar predicciones';
       setError(message);
-      throw err;
+      // Don't throw - let the component handle the error state
     } finally {
       setIsSubmitting(false);
     }

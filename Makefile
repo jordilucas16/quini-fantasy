@@ -25,9 +25,6 @@ help:
 	@echo "  make setup-db           ⚠️  PELIGRO - Reset completo (BORRA TODO)"
 	@echo "                          (Solo primera vez o desarrollo)"
 	@echo ""
-	@echo "  make load-players       Cargar jugadores desde CSVs"
-	@echo "  make seed               Crear nueva jornada"
-	@echo ""
 	@echo "🔧 Desarrollo:"
 	@echo "  make api                Iniciar solo backend"
 	@echo "  make frontend           Iniciar solo frontend"
@@ -80,10 +77,6 @@ api:
 # Load players from CSV files
 load-players:
 	uv run python -m quini_fantasy.load_players
-
-# Seed database with new round and matchups
-seed:
-	uv run python -m quini_fantasy.seed
 
 # Complete setup: reset database, load players, seed round (⚠️ DELETES ALL DATA)
 setup-db:

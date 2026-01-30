@@ -154,3 +154,12 @@ class PredictionDetailResponse(BaseModel):
     correct_count: int
     total_count: int
     matchups: list[MatchupDetailResponse]
+
+
+# Ranking schemas
+class RankingEntryResponse(BaseModel):
+    """Schema for a single ranking entry."""
+
+    rank: int
+    username: str
+    total_score: int
