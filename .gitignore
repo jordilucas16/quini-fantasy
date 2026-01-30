@@ -19,8 +19,14 @@ build/
 # Claude Code
 .claude/
 
-# Database
-data/
+# Database files (but keep CSVs for deployment)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
+# Keep CSVs for deployment initialization
+!data/*.csv
 
 # Frontend
 frontend/node_modules/

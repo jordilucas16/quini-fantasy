@@ -1,143 +1,246 @@
-# Quini Fantasy
+# Quini Fantasy ⚽🏆
 
-Una aplicación de Fantasy Football al estilo quiniela. Los usuarios predicen qué jugador de dos obtendrá más puntos en 11 enfrentamientos por jornada.
+La quiniela del fantasy football para La Liga. Predice qué jugador conseguirá más puntos en cada enfrentamiento semanal.
 
-## Setup Inicial
+## 🎮 ¿Qué es Quini Fantasy?
 
-```bash
-# 1. Instalar dependencias (backend y frontend)
-make install
-cd frontend && npm install
+Una aplicación web de fantasy football estilo quiniela donde:
+- Cada semana se presentan **11 enfrentamientos** entre pares de jugadores de La Liga
+- Eliges el jugador que crees que conseguirá **más puntos**
+- Compites en el **ranking** con otros usuarios
+- Acumulas puntos según tus aciertos
 
-# 2. Configurar la base de datos con datos reales
-make setup-db
+## 🚀 Quick Start
 
-# 3. Iniciar backend y frontend
-make start
-```
-
-La aplicación estará disponible en:
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8000
-- Docs API: http://localhost:8000/docs
-
-## Base de Datos
-
-### 🚨 IMPORTANTE: Comandos de Base de Datos
-
-#### ✅ Actualización Semanal (RECOMENDADO - Seguro)
+### Desarrollo Local
 
 ```bash
-# Actualizar jugadores y crear nueva jornada SIN borrar usuarios
-make refresh-weekly
+# 1. Clonar repositorio
+git clone https://github.com/tu-usuario/quini-fantasy.git
+cd quini-fantasy
+
+# 2. Instalar dependencias
+make install              # Backend (Python)
+make frontend-install     # Frontend (React)
+
+# 3. Setup base de datos (solo primera vez)
+make setup-db            # ⚠️ BORRA TODO - solo para desarrollo
+
+# 4. Iniciar aplicación
+make start               # Backend + Frontend simultáneamente
 ```
 
-**✓ Preserva:** usuarios, predicciones, historial
-**Actualiza:** estadísticas de jugadores, crea nueva jornada
+Abre tu navegador en:
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:8000
+- **Docs API:** http://localhost:8000/docs
 
-**💡 Usa este comando cada semana después de actualizar los CSVs.**
-
-#### ⚠️ Setup Inicial (PELIGRO - Solo primera vez)
+### Actualización Semanal (Producción)
 
 ```bash
-# ⛔ BORRA TODO: usuarios, predicciones, historial
-make setup-db
+# Actualizar jugadores y crear nueva jornada
+make refresh-weekly      # ✅ SEGURO - Preserva usuarios y datos
 ```
 
-**⚠️ Este comando DESTRUYE todos los datos.**
-Solo úsalo la primera vez que configuras el proyecto.
-Te pedirá confirmación escribiendo "SI BORRAR TODO".
-
-### Comandos Individuales
-
-```bash
-# Solo cargar jugadores desde CSVs (borra jugadores existentes)
-make load-players
-
-# Solo crear nueva jornada (preserva todo lo demás)
-make seed
-
-# Resetear base de datos completa (⚠️ borra TODO)
-make reset-db
-```
-
-### 📖 Documentación Completa
-
-Ver [DATABASE.md](DATABASE.md) para:
-- Explicación detallada de cada comando
-- Estructura de la base de datos
-- Flujo de trabajo semanal
-- Troubleshooting
-
-## Desarrollo
-
-### Backend
-
-```bash
-# Format code
-make fmt
-
-# Run linter
-make lint
-
-# Run type checker
-make typecheck
-
-# Run tests
-make test
-
-# Run all CI checks
-make ci
-```
-
-### Frontend
-
-```bash
-cd frontend
-
-# Desarrollo
-npm run dev
-
-# Build
-npm run build
-
-# Type check
-npm run typecheck
-```
-
-## Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
 quini-fantasy/
-├── src/quini_fantasy/       # Backend Python
-│   ├── models.py           # Modelos SQLAlchemy
-│   ├── api.py              # Endpoints FastAPI
-│   ├── auth.py             # Autenticación JWT
-│   ├── load_players.py     # Script de carga CSV
-│   └── seed.py             # Script de seed
-├── frontend/               # Frontend React
-│   └── src/
-│       ├── components/     # Componentes React
-│       ├── contexts/       # Context providers
-│       └── services/       # API client
-├── data/
-│   ├── csv_laliga/        # CSVs con estadísticas
-│   └── quini_fantasy.db   # Base de datos SQLite
-└── DATABASE.md            # Documentación de la BD
+├── src/quini_fantasy/        # Backend FastAPI
+│   ├── main.py              # Entry point
+│   ├── api.py               # API endpoints
+│   ├── models.py            # SQLAlchemy models
+│   ├── schemas.py           # Pydantic schemas
+│   ├── auth.py              # JWT authentication
+│   ├── database.py          # DB configuration
+│   ├── load_players.py      # CSV → Database
+│   └── seed.py              # Create rounds
+├── frontend/                 # Frontend React + Vite
+│   ├── src/
+│   │   ├── components/      # React components
+│   │   ├── contexts/        # Auth context
+│   │   ├── hooks/           # Custom hooks
+│   │   ├── services/        # API service
+│   │   └── types/           # TypeScript types
+│   └── public/              # Static assets
+├── data/                     # Data files
+│   ├── players_stats.csv    # Player statistics
+│   ├── team_stats.csv       # Team statistics
+│   └── quini_fantasy.db     # SQLite database (gitignored)
+├── tests/                    # Backend tests
+├── Dockerfile               # Production build
+├── docker-entrypoint.sh     # Container startup
+├── render.yaml              # Render.com config
+└── Makefile                 # Development commands
 ```
 
-## Flujo de Trabajo Semanal
+## 🛠️ Stack Tecnológico
 
-1. **Actualizar estadísticas:**
-   - Descargar CSVs actualizados con estadísticas de La Liga
-   - Colocarlos en `data/csv_laliga/`
+### Backend
+- **FastAPI** - Modern Python web framework
+- **SQLAlchemy** - ORM para base de datos
+- **SQLite** - Base de datos (PostgreSQL en producción recomendado)
+- **JWT** - Autenticación con tokens
+- **Bcrypt** - Hash de contraseñas
+- **Pydantic** - Validación de datos
+- **Uvicorn** - ASGI server
 
-2. **Actualizar base de datos:**
-   ```bash
-   make refresh-weekly
-   ```
+### Frontend
+- **React 19** - UI framework
+- **TypeScript** - Type safety
+- **Vite** - Build tool
+- **Tailwind CSS 4** - Styling
+- **Framer Motion** - Animations
+- **Headless UI** - Accessible components
+- **Lucide React** - Icons
 
-3. **Verificar:**
-   - Los jugadores se actualizan con nuevas estadísticas
-   - Se crea una nueva jornada con enfrentamientos aleatorios
-   - El deadline se establece a 3 días después
+### DevOps
+- **uv** - Fast Python package manager
+- **Docker** - Containerization
+- **Render** - Deployment platform
+
+## 📊 Base de Datos
+
+### Modelos principales
+
+```python
+User         # Usuarios registrados
+Round        # Jornadas (semanas)
+Player       # Jugadores de La Liga
+Matchup      # Enfrentamientos (11 por jornada)
+Prediction   # Predicciones de usuarios
+```
+
+Ver [DATABASE.md](DATABASE.md) para esquema completo.
+
+## 🎯 Comandos Disponibles
+
+### Desarrollo
+
+```bash
+make start              # Iniciar backend + frontend
+make api                # Solo backend (puerto 8000)
+make frontend           # Solo frontend (puerto 5173)
+make test               # Ejecutar tests
+make lint               # Linter (ruff)
+make fmt                # Formatear código
+```
+
+### Base de Datos
+
+```bash
+make refresh-weekly     # ✅ Actualizar datos (preserva usuarios)
+make setup-db           # ⚠️ Reset completo (BORRA TODO)
+```
+
+Ver todos los comandos: `make help`
+
+## 🚢 Deployment
+
+### Render.com (Recomendado)
+
+1. Conecta tu repo de GitHub a Render
+2. Render detecta automáticamente `render.yaml`
+3. Deploy automático con cada push a `main`
+
+Ver [DEPLOYMENT.md](DEPLOYMENT.md) para guía completa.
+
+### Variables de Entorno (Producción)
+
+```bash
+JWT_SECRET_KEY=<auto-generated-by-render>
+RENDER=true
+PORT=8000
+```
+
+## 🔐 Autenticación
+
+- **JWT tokens** con expiración de 7 días
+- **Bcrypt** para hash de contraseñas
+- **HTTP-only** bearer tokens
+- Endpoints protegidos con `Depends(require_auth)`
+
+## 📈 Sistema de Puntuación
+
+### Estadísticas Generales (Todos los jugadores)
+- ✅ Goles: +3 puntos
+- ✅ Asistencias: +1.5 puntos
+- ✅ Partidos jugados: +0.2 puntos
+- ❌ Tarjeta amarilla: -0.5 puntos
+- ❌ Tarjeta roja: -2 puntos
+
+### Estadísticas de Portero (Solo GK)
+- ✅ Portería a cero: +3 puntos
+- ✅ Penalti parado: +2.5 puntos
+- ✅ Parada: +1 punto
+- ❌ Gol en contra: -1 punto
+
+**Media del jugador:** `Suma total / 21 jornadas`
+
+## 🎨 Características del Frontend
+
+- ✅ Diseño profesional con Tailwind CSS
+- ✅ Animaciones suaves con Framer Motion
+- ✅ Responsive (móvil, tablet, desktop)
+- ✅ Modo oscuro (único theme)
+- ✅ Páginas:
+  - Jugar (predicciones)
+  - Ranking (leaderboard)
+  - Historial (predicciones pasadas)
+  - Puntuación (sistema explicado)
+  - Reglas/FAQ
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+make test
+
+# Con coverage
+pytest --cov=src/quini_fantasy tests/
+```
+
+## 📝 Flujo de Trabajo Semanal
+
+1. **Lunes:** Actualizar CSVs con estadísticas de la jornada pasada
+2. **Martes:** Ejecutar `make refresh-weekly`
+   - Actualiza stats de jugadores
+   - Crea nueva jornada con 11 enfrentamientos aleatorios
+3. **Usuarios:** Envían predicciones durante la semana
+4. **Fin de semana:** Partidos de La Liga
+5. **Repetir**
+
+## 🤝 Contribuir
+
+1. Fork el repositorio
+2. Crea una branch (`git checkout -b feature/nueva-feature`)
+3. Commit cambios (`git commit -m 'Add nueva feature'`)
+4. Push a la branch (`git push origin feature/nueva-feature`)
+5. Abre un Pull Request
+
+### Coding Standards
+
+- Python: Ruff para linting y formatting
+- TypeScript/React: ESLint
+- Commits: Conventional Commits
+- Tests: Pytest (backend), Vitest (frontend - TODO)
+
+## 📄 Licencia
+
+MIT License - Ver [LICENSE](LICENSE)
+
+## 🙏 Créditos
+
+- Datos de jugadores: [FBref](https://fbref.com)
+- Iconos: [Lucide](https://lucide.dev)
+- Diseño inspirado en Bento Grid y Glassmorphism
+
+## 📞 Soporte
+
+- 🐛 **Bugs:** [GitHub Issues](https://github.com/tu-usuario/quini-fantasy/issues)
+- 💬 **Discusiones:** [GitHub Discussions](https://github.com/tu-usuario/quini-fantasy/discussions)
+- 📧 **Email:** tu-email@ejemplo.com
+
+---
+
+**Hecho con ⚽ y ☕**

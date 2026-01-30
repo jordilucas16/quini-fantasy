@@ -1,0 +1,29 @@
+services:
+  # Web service for Quini Fantasy
+  - type: web
+    name: quini-fantasy
+    runtime: docker
+    plan: free
+    region: frankfurt  # or oregon for US
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: RENDER
+        value: "true"
+    disk:
+      name: quini-fantasy-data
+      mountPath: /app/data
+      sizeGB: 1
+
+# Notes:
+# - Disk ensures SQLite database persists across deployments
+# - JWT_SECRET_KEY is auto-generated for security
+# - Health check at /health
+# - Free tier: 750 hours/month
+# - To deploy: Connect your GitHub repo to Render
+# - First deployment will auto-initialize the database
