@@ -13,8 +13,9 @@ interface PlayerCardCompactProps {
 }
 
 /**
- * Compact player card for quiniela-style matchup selection
- * Designed to fit two cards side by side in a row
+ * Compact player card for quiniela-style matchup selection.
+ * Mobile: vertical stack layout so player names are fully readable.
+ * Desktop (sm+): horizontal layout with avatar, name, and stats side by side.
  */
 export function PlayerCardCompact({
   player,
@@ -36,8 +37,8 @@ export function PlayerCardCompact({
       onClick={onSelect}
       disabled={disabled}
       className={clsx(
-        'relative flex-1 min-w-0 py-3 px-3 sm:px-4 transition-all duration-200',
-        'border-2 focus-visible:outline-none',
+        'relative flex-1 min-w-0 py-2 px-2 sm:py-3 sm:px-4 transition-all duration-200',
+        'border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
         'rounded-lg sm:rounded-xl',
         side === 'left' ? 'rounded-r-none sm:rounded-r-none' : 'rounded-l-none sm:rounded-l-none',
         isSelected
@@ -56,7 +57,7 @@ export function PlayerCardCompact({
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className={clsx(
-            'absolute top-1 w-5 h-5 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-md',
+            'absolute top-1 w-5 h-5 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-md z-10',
             side === 'left' ? 'left-1' : 'right-1'
           )}
         >
@@ -64,30 +65,28 @@ export function PlayerCardCompact({
         </motion.div>
       )}
 
-      {/* Card content - responsive layout */}
+      {/* ===== MOBILE LAYOUT (< sm): Vertical stack ===== */}
       <div className={clsx(
-        'flex items-center gap-2 sm:gap-3',
-        side === 'right' && 'flex-row-reverse'
+        'flex flex-col items-center gap-1 sm:hidden',
       )}>
-        {/* Player photo/avatar - smaller on mobile */}
+        {/* Avatar + position badge */}
         <div className="relative flex-shrink-0">
           {player.photo ? (
             <img
               src={player.photo}
               alt=""
-              className="w-8 h-8 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white/20"
+              className="w-9 h-9 rounded-full object-cover border-2 border-white/20"
             />
           ) : (
-            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-primary-500/50 to-accent-500/50 flex items-center justify-center border-2 border-white/20">
-              <span className="text-xs sm:text-base font-bold text-white">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500/50 to-accent-500/50 flex items-center justify-center border-2 border-white/20">
+              <span className="text-xs font-bold text-white">
                 {player.name.charAt(0)}
               </span>
             </div>
           )}
-          {/* Position badge overlay */}
           <span className={clsx(
             'absolute -bottom-1 left-1/2 -translate-x-1/2',
-            'px-1 py-0.5 text-[9px] sm:text-[10px] font-bold rounded uppercase',
+            'px-1 py-0.5 text-[8px] font-bold rounded uppercase leading-none',
             player.position === 'GK' && 'bg-amber-500/80 text-amber-100',
             player.position === 'DF' && 'bg-blue-500/80 text-blue-100',
             player.position === 'MF' && 'bg-green-500/80 text-green-100',
@@ -97,35 +96,82 @@ export function PlayerCardCompact({
           </span>
         </div>
 
-        {/* Player info - allow 2 lines on mobile */}
+        {/* Player name - full width, centered, allow wrapping */}
+        <p className="w-full text-[11px] font-bold text-white leading-tight text-center mt-0.5">
+          {player.name}
+        </p>
+
+        {/* Avg points */}
+        <div className="flex items-center gap-1 mt-0.5">
+          <span className="text-sm font-bold gradient-text leading-none">
+            {player.avgPoints.toFixed(1)}
+          </span>
+          <span className="text-[8px] text-white/40 leading-none">pts</span>
+        </div>
+      </div>
+
+      {/* ===== DESKTOP LAYOUT (sm+): Horizontal — unchanged from original ===== */}
+      <div className={clsx(
+        'hidden sm:flex items-center gap-3',
+        side === 'right' && 'flex-row-reverse'
+      )}>
+        {/* Player photo/avatar */}
+        <div className="relative flex-shrink-0">
+          {player.photo ? (
+            <img
+              src={player.photo}
+              alt=""
+              className="w-12 h-12 rounded-full object-cover border-2 border-white/20"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500/50 to-accent-500/50 flex items-center justify-center border-2 border-white/20">
+              <span className="text-base font-bold text-white">
+                {player.name.charAt(0)}
+              </span>
+            </div>
+          )}
+          {/* Position badge overlay */}
+          <span className={clsx(
+            'absolute -bottom-1 left-1/2 -translate-x-1/2',
+            'px-1 py-0.5 text-[10px] font-bold rounded uppercase',
+            player.position === 'GK' && 'bg-amber-500/80 text-amber-100',
+            player.position === 'DF' && 'bg-blue-500/80 text-blue-100',
+            player.position === 'MF' && 'bg-green-500/80 text-green-100',
+            player.position === 'FW' && 'bg-red-500/80 text-red-100',
+          )}>
+            {player.position}
+          </span>
+        </div>
+
+        {/* Player info */}
         <div className={clsx(
           'flex-1 min-w-0',
           side === 'left' ? 'text-left' : 'text-right'
         )}>
-          <h4 className="text-xs sm:text-base font-bold text-white leading-tight line-clamp-2 sm:truncate">
+          <h4 className="text-base font-bold text-white leading-tight truncate">
             {player.name}
           </h4>
-          <p className="text-[10px] sm:text-xs text-white/50 truncate hidden sm:block">
+          <p className="text-xs text-white/50 truncate">
             {player.team}
           </p>
         </div>
 
-        {/* Stats - compact, smaller on mobile */}
+        {/* Stats - avg points */}
         <div className={clsx(
           'flex flex-col items-center gap-0 flex-shrink-0',
-          side === 'right' ? 'border-r border-white/10 pr-1.5 sm:pr-3' : 'border-l border-white/10 pl-1.5 sm:pl-3'
+          side === 'right' ? 'border-r border-white/10 pr-3' : 'border-l border-white/10 pl-3'
         )}>
           <div className="flex items-center gap-1">
-            <span className="text-base sm:text-xl font-bold gradient-text">
+            <span className="text-xl font-bold gradient-text">
               {player.avgPoints.toFixed(1)}
             </span>
           </div>
-          <span className="text-[9px] sm:text-[10px] text-white/40">Media</span>
+          <span className="text-[10px] text-white/40">Media</span>
         </div>
 
-        {/* Recent form indicator - hidden on very small screens */}
+        {/* Recent form indicator */}
         <div className={clsx(
-          'hidden sm:flex flex-col items-center gap-0.5 flex-shrink-0',
+          'flex flex-col items-center gap-0.5 flex-shrink-0',
           side === 'right' ? 'border-r border-white/10 pr-3' : 'border-l border-white/10 pl-3'
         )}>
           <div className="flex items-center gap-0.5">
