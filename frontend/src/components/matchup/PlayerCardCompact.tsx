@@ -69,17 +69,17 @@ export function PlayerCardCompact({
         'flex items-center gap-2 sm:gap-3',
         side === 'right' && 'flex-row-reverse'
       )}>
-        {/* Player photo/avatar */}
+        {/* Player photo/avatar - smaller on mobile */}
         <div className="relative flex-shrink-0">
           {player.photo ? (
             <img
               src={player.photo}
               alt=""
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white/20"
+              className="w-8 h-8 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-white/20"
             />
           ) : (
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-primary-500/50 to-accent-500/50 flex items-center justify-center border-2 border-white/20">
-              <span className="text-sm sm:text-base font-bold text-white">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-primary-500/50 to-accent-500/50 flex items-center justify-center border-2 border-white/20">
+              <span className="text-xs sm:text-base font-bold text-white">
                 {player.name.charAt(0)}
               </span>
             </div>
@@ -87,7 +87,7 @@ export function PlayerCardCompact({
           {/* Position badge overlay */}
           <span className={clsx(
             'absolute -bottom-1 left-1/2 -translate-x-1/2',
-            'px-1.5 py-0.5 text-[10px] font-bold rounded uppercase',
+            'px-1 py-0.5 text-[9px] sm:text-[10px] font-bold rounded uppercase',
             player.position === 'GK' && 'bg-amber-500/80 text-amber-100',
             player.position === 'DF' && 'bg-blue-500/80 text-blue-100',
             player.position === 'MF' && 'bg-green-500/80 text-green-100',
@@ -97,30 +97,30 @@ export function PlayerCardCompact({
           </span>
         </div>
 
-        {/* Player info */}
+        {/* Player info - allow 2 lines on mobile */}
         <div className={clsx(
           'flex-1 min-w-0',
           side === 'left' ? 'text-left' : 'text-right'
         )}>
-          <h4 className="text-sm sm:text-base font-bold text-white truncate leading-tight">
+          <h4 className="text-xs sm:text-base font-bold text-white leading-tight line-clamp-2 sm:truncate">
             {player.name}
           </h4>
-          <p className="text-xs text-white/50 truncate">
+          <p className="text-[10px] sm:text-xs text-white/50 truncate hidden sm:block">
             {player.team}
           </p>
         </div>
 
-        {/* Stats - compact */}
+        {/* Stats - compact, smaller on mobile */}
         <div className={clsx(
-          'flex flex-col items-center gap-0.5 flex-shrink-0',
-          side === 'right' ? 'border-r border-white/10 pr-2 sm:pr-3' : 'border-l border-white/10 pl-2 sm:pl-3'
+          'flex flex-col items-center gap-0 flex-shrink-0',
+          side === 'right' ? 'border-r border-white/10 pr-1.5 sm:pr-3' : 'border-l border-white/10 pl-1.5 sm:pl-3'
         )}>
           <div className="flex items-center gap-1">
-            <span className="text-lg sm:text-xl font-bold gradient-text">
+            <span className="text-base sm:text-xl font-bold gradient-text">
               {player.avgPoints.toFixed(1)}
             </span>
           </div>
-          <span className="text-[10px] text-white/40">Media</span>
+          <span className="text-[9px] sm:text-[10px] text-white/40">Media</span>
         </div>
 
         {/* Recent form indicator - hidden on very small screens */}
