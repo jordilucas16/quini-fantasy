@@ -70,9 +70,9 @@ def seed_database() -> None:
                 last_num = int(latest_round.name.split()[-1])
                 next_num = last_num + 1
             except (ValueError, IndexError):
-                next_num = 1
+                next_num = 22  # Default to current jornada
         else:
-            next_num = 1
+            next_num = 22  # Default to current jornada (changed from 1)
 
         # Create new round
         round_obj = Round(

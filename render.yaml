@@ -15,15 +15,11 @@ services:
         generateValue: true
       - key: RENDER
         value: "true"
-    disk:
-      name: quini-fantasy-data
-      mountPath: /app/data
-      sizeGB: 1
 
 # Notes:
-# - Disk ensures SQLite database persists across deployments
+# - Free tier: No persistent disk (database resets on each deploy)
+# - Database is initialized from CSV on startup
 # - JWT_SECRET_KEY is auto-generated for security
 # - Health check at /health
 # - Free tier: 750 hours/month
 # - To deploy: Connect your GitHub repo to Render
-# - First deployment will auto-initialize the database
