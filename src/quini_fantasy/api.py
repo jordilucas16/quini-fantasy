@@ -13,7 +13,7 @@ from quini_fantasy.auth import (
     verify_password,
 )
 from quini_fantasy.database import get_db
-from quini_fantasy.models import Matchup, Prediction, Round, User
+from quini_fantasy.models import Matchup, Player, Prediction, Round, User
 from quini_fantasy.schemas import (
     AuthStatusResponse,
     MatchupDetailResponse,
