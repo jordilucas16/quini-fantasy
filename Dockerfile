@@ -45,11 +45,15 @@ COPY data/ ./data/
 RUN test -f ./data/csv_laliga/standard_stats_20260122.csv || (echo "ERROR: CSV files not copied!" && exit 1)
 RUN echo "✓ CSV files verified in Docker image"
 
+# BUILD DATABASE AT BUILD TIME (not runtime!)
+RUN echo "🏗️  Building database from CSVs..." && \
+    uv run python -m quini_fantasy.load_players && \
+    uv run python -m quini_fantasy.seed && \
+    echo "✅ Database built successfully" && \
+    ls -lh /app/data/quini_fantasy.db
+
 # Copy built frontend from previous stage
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
-
-# Create directory for SQLite database
-RUN mkdir -p /app/data
 
 # Expose port
 EXPOSE 8000

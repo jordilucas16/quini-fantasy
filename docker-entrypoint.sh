@@ -5,66 +5,37 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  Quini Fantasy - Starting Application"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "DEBUG: Current directory: $(pwd)"
-echo "DEBUG: Contents of /app:"
-ls -la /app/
-echo ""
-echo "DEBUG: Contents of /app/data:"
-ls -la /app/data/ || echo "ERROR: /app/data does not exist!"
-echo ""
-echo "DEBUG: Contents of /app/data/csv_laliga:"
-ls -la /app/data/csv_laliga/ || echo "ERROR: /app/data/csv_laliga does not exist!"
-echo ""
 
-# Remove old database if it exists (free tier has no persistence)
-if [ -f "/app/data/quini_fantasy.db" ]; then
-    echo "🗑️  Removing old database..."
-    rm -f /app/data/quini_fantasy.db
-fi
-
-echo "📦 Initializing database from CSV..."
-
-# Load players from CSV
-if [ -f "/app/data/csv_laliga/standard_stats_20260122.csv" ]; then
-    echo "📊 CSV files found, loading players..."
-    echo "DEBUG: First 10 lines of standard_stats CSV:"
-    head -10 /app/data/csv_laliga/standard_stats_20260122.csv
-    echo ""
-
-    echo "DEBUG: Running load_players script..."
-    uv run python -m quini_fantasy.load_players
-
-    if [ $? -ne 0 ]; then
-        echo "⚠️  ERROR: load_players script failed!"
-        exit 1
-    fi
-
-    echo "✓ Players loaded successfully"
-else
-    echo "⚠️  ERROR: No players CSV found at /app/data/csv_laliga/standard_stats_20260122.csv"
-    echo "ERROR: Available files in /app:"
-    find /app -name "*.csv" -type f || echo "No CSV files found in /app!"
-    exit 1
-fi
-
-# Verify database was created
+# Verify database exists (created at build time)
 if [ ! -f "/app/data/quini_fantasy.db" ]; then
-    echo "⚠️  ERROR: Database file was not created!"
+    echo "❌ ERROR: Database not found! This should have been created at build time."
     exit 1
 fi
 
-echo "DEBUG: Database file size: $(ls -lh /app/data/quini_fantasy.db | awk '{print $5}')"
+echo "✅ Database found at /app/data/quini_fantasy.db"
+echo "📊 Database size: $(ls -lh /app/data/quini_fantasy.db | awk '{print $5}')"
 
-# Create initial round
-echo "🎮 Creating initial round (Jornada 22)..."
-uv run python -m quini_fantasy.seed
+# Quick database verification
+echo "🔍 Verifying database contents..."
+uv run python -c "
+from quini_fantasy.database import SessionLocal
+from quini_fantasy.models import Player, Round
+db = SessionLocal()
+player_count = db.query(Player).count()
+round_count = db.query(Round).count()
+print(f'  - Players: {player_count}')
+print(f'  - Rounds: {round_count}')
+if player_count < 100:
+    print('❌ ERROR: Too few players in database!')
+    exit(1)
+print('✅ Database verification passed')
+db.close()
+"
 
 if [ $? -ne 0 ]; then
-    echo "⚠️  ERROR: seed script failed!"
+    echo "❌ Database verification failed!"
     exit 1
 fi
-
-echo "✓ Database initialized successfully"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
