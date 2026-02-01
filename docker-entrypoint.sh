@@ -11,7 +11,7 @@ if [ ! -f "/app/data/quini_fantasy.db" ]; then
     echo "📦 Database not found. Initializing..."
 
     # Load players from CSV
-    if [ -f "/app/data/players_stats.csv" ]; then
+    if [ -f "/app/data/csv_laliga/standard_stats_20260122.csv" ]; then
         echo "📊 Loading players from CSV..."
         uv run python -m quini_fantasy.load_players
     else
