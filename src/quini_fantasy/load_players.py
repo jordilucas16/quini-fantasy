@@ -27,15 +27,35 @@ def normalize_position(pos: str) -> str:
 
 def load_players_from_csv() -> None:
     """Load players from standard_stats and goalkeeping_stats CSV files."""
+    print("=" * 80)
+    print("DEBUG: load_players_from_csv() started")
+    print("=" * 80)
+
     init_db()
     db = SessionLocal()
 
     try:
         # Get CSV file paths
         base_dir = Path(__file__).resolve().parent.parent.parent
+        print(f"DEBUG: base_dir = {base_dir}")
+        print(f"DEBUG: __file__ = {Path(__file__).resolve()}")
+
         csv_dir = base_dir / "data" / "csv_laliga"
+        print(f"DEBUG: csv_dir = {csv_dir}")
+        print(f"DEBUG: csv_dir exists? {csv_dir.exists()}")
+
+        if csv_dir.exists():
+            print(f"DEBUG: Contents of csv_dir:")
+            for item in csv_dir.iterdir():
+                print(f"  - {item.name} ({item.stat().st_size} bytes)")
+
         standard_stats_path = csv_dir / "standard_stats_20260122.csv"
         goalkeeping_stats_path = csv_dir / "goalkeeping_stats_20260122.csv"
+
+        print(f"DEBUG: standard_stats_path = {standard_stats_path}")
+        print(f"DEBUG: standard_stats_path exists? {standard_stats_path.exists()}")
+        print(f"DEBUG: goalkeeping_stats_path = {goalkeeping_stats_path}")
+        print(f"DEBUG: goalkeeping_stats_path exists? {goalkeeping_stats_path.exists()}")
 
         if not standard_stats_path.exists():
             raise FileNotFoundError(
@@ -48,8 +68,11 @@ def load_players_from_csv() -> None:
 
         # Clear existing players
         print("Clearing existing players...")
+        existing_count = db.query(Player).count()
+        print(f"DEBUG: Found {existing_count} existing players in database")
         db.query(Player).delete()
         db.commit()
+        print("DEBUG: Existing players cleared")
 
         # Load goalkeeper stats into a dictionary
         gk_stats = {}
@@ -72,16 +95,30 @@ def load_players_from_csv() -> None:
         # Load all players from standard stats
         players = []
         print(f"Loading players from {standard_stats_path}...")
+        print(f"DEBUG: File size: {standard_stats_path.stat().st_size} bytes")
+
+        # Track unique teams to verify we're loading La Liga only
+        teams_found = set()
+
         with open(standard_stats_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
+            row_count = 0
             for row in reader:
+                row_count += 1
+
                 # Skip header rows
                 if row["Player"] == "Player" or row["Gls"] == "Gls":
+                    print(f"DEBUG: Skipping header row at line {row_count}")
                     continue
 
                 player_name = row["Player"].strip()
                 position = normalize_position(row["Pos"])
                 team = row["Squad"].strip()
+                teams_found.add(team)
+
+                # Debug first 5 players
+                if len(players) < 5:
+                    print(f"DEBUG: Loading player {len(players) + 1}: {player_name} ({team}, {position})")
 
                 # Parse numeric fields with defaults
                 try:
@@ -154,6 +191,36 @@ def load_players_from_csv() -> None:
         print("\nPosition breakdown:")
         for pos, count in sorted(position_counts.items()):
             print(f"  {pos}: {count} players")
+
+        # Show teams found (CRITICAL: should only be La Liga teams)
+        print("\nTeams found in CSV:")
+        for team in sorted(teams_found):
+            print(f"  - {team}")
+
+        # Verify only La Liga teams
+        non_laliga_teams = [
+            "Manchester City", "Arsenal", "Chelsea", "Liverpool",
+            "PSG", "AC Milan", "Inter", "Juventus",
+            "Bayern Munich", "Dortmund",
+            "Al-Nassr", "Al-Hilal"
+        ]
+        found_non_laliga = [t for t in teams_found if t in non_laliga_teams]
+        if found_non_laliga:
+            raise ValueError(
+                f"ERROR: Found non-La Liga teams in CSV: {found_non_laliga}"
+            )
+
+        print("\n✓ VERIFICATION PASSED: All teams are La Liga teams")
+
+        # Verify database contents
+        db_player_count = db.query(Player).count()
+        print(f"\nDEBUG: Database verification:")
+        print(f"  - Players added: {len(players)}")
+        print(f"  - Players in DB: {db_player_count}")
+        if db_player_count != len(players):
+            raise ValueError(
+                f"ERROR: Mismatch between added ({len(players)}) and saved ({db_player_count}) players"
+            )
 
     except Exception as e:
         db.rollback()

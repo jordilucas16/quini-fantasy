@@ -42,6 +42,10 @@ def create_random_matchups(db, round_id: int, num_matchups: int = 11) -> list[Ma
 
 def seed_database() -> None:
     """Populate database with a new round and random matchups."""
+    print("=" * 80)
+    print("DEBUG: seed_database() started")
+    print("=" * 80)
+
     init_db()
     db = SessionLocal()
 
@@ -54,6 +58,19 @@ def seed_database() -> None:
             return
 
         print(f"Found {player_count} players in database")
+
+        # Debug: Show first 10 players in database
+        sample_players = db.query(Player).limit(10).all()
+        print("\nDEBUG: First 10 players in database:")
+        for p in sample_players:
+            print(f"  - {p.name} ({p.team}, {p.position})")
+
+        # Debug: Show unique teams in database
+        all_players = db.query(Player).all()
+        teams_in_db = set(p.team for p in all_players)
+        print(f"\nDEBUG: Unique teams in database ({len(teams_in_db)}):")
+        for team in sorted(teams_in_db):
+            print(f"  - {team}")
 
         # Check if there's already an active round
         active_round = db.query(Round).filter(Round.is_active.is_(True)).first()

@@ -384,3 +384,34 @@ def get_rankings(db: Session = Depends(get_db)) -> list[RankingEntryResponse]:
     ]
 
     return rankings
+
+
+# Debug endpoint to verify database contents
+@router.get("/debug/database-info")
+def get_database_info(db: Session = Depends(get_db)) -> dict:
+    """Debug endpoint to verify database contents. REMOVE IN PRODUCTION."""
+    from quini_fantasy.models import Player
+
+    total_players = db.query(Player).count()
+
+    # Get unique teams
+    all_players = db.query(Player).all()
+    teams = sorted(set(p.team for p in all_players))
+
+    # Get sample players
+    sample_players = db.query(Player).limit(20).all()
+
+    return {
+        "total_players": total_players,
+        "unique_teams": teams,
+        "team_count": len(teams),
+        "sample_players": [
+            {
+                "name": p.name,
+                "team": p.team,
+                "position": p.position,
+                "avg_points": p.avg_points,
+            }
+            for p in sample_players
+        ],
+    }

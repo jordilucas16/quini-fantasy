@@ -37,7 +37,13 @@ RUN uv sync --frozen --no-dev
 
 # Copy backend source
 COPY src/ ./src/
+
+# Copy data directory with CSV files (CRITICAL for database initialization)
 COPY data/ ./data/
+
+# Verify CSV files were copied (fail build if missing)
+RUN test -f ./data/csv_laliga/standard_stats_20260122.csv || (echo "ERROR: CSV files not copied!" && exit 1)
+RUN echo "✓ CSV files verified in Docker image"
 
 # Copy built frontend from previous stage
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
