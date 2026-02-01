@@ -71,5 +71,9 @@ if is_production:
             if file_path.exists() and file_path.is_file():
                 return FileResponse(file_path)
 
-            # Otherwise, serve index.html (SPA routing)
-            return FileResponse(frontend_dist / "index.html")
+            # Otherwise, serve index.html (SPA routing) with no-cache headers
+            response = FileResponse(frontend_dist / "index.html")
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
